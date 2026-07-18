@@ -48,6 +48,16 @@
   }
   .streak b{color:var(--pearl);}
 
+  /* word of the day */
+  .wotd{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:16px 18px;margin-bottom:18px;
+  }
+  .wotd-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--pearl-faint);margin-bottom:8px;}
+  .wotd-term{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--pearl);margin-bottom:6px;}
+  .wotd-meaning{font-size:13.5px;color:var(--pearl-dim);line-height:1.5;margin-bottom:8px;}
+  .wotd-example{font-size:13px;color:var(--pearl-faint);font-style:italic;}
+
   /* tab nav */
   .tabs{
     display:flex;gap:4px;flex-wrap:wrap;
@@ -204,6 +214,13 @@
     </div>
     <div class="streak" id="streakBadge">🔥 <b>0</b>-day streak</div>
   </header>
+
+  <div class="wotd" id="wordOfDay">
+    <div class="wotd-label">Word of the Day</div>
+    <div class="wotd-term" id="wotdTerm"></div>
+    <div class="wotd-meaning" id="wotdMeaning"></div>
+    <div class="wotd-example" id="wotdExample"></div>
+  </div>
 
   <div class="tabs" id="tabs">
     <button data-tab="library" class="active">📚 Library</button>
@@ -880,12 +897,22 @@ function loadStreak(){
   document.getElementById('streakBadge').innerHTML = `🔥 <b>${data.streak||1}</b>-day streak`;
 }
 
+/* ============ WORD OF THE DAY ============ */
+function loadWordOfDay(){
+  const daysSinceEpoch = Math.floor(Date.now() / 86400000);
+  const word = VOCAB[daysSinceEpoch % VOCAB.length];
+  document.getElementById('wotdTerm').textContent = word.term;
+  document.getElementById('wotdMeaning').textContent = word.meaning;
+  document.getElementById('wotdExample').textContent = `"${word.example}"`;
+}
+
 /* ============ INIT ============ */
 renderLibrary();
 renderMistakes();
 renderVocab();
 renderIdioms();
 loadStreak();
+loadWordOfDay();
 </script>
 </body>
 </html>
