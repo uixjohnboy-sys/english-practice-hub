@@ -706,7 +706,7 @@ function flatPhrases(mode){
 function newQuizQuestion(){
   const pool = flatPhrases(quizMode);
   const correct = pool[Math.floor(Math.random()*pool.length)];
-  let distractors = pool.filter(p=>p.en!==correct.en).sort(()=>0.5-Math.random()).slice(0,3);
+  let distractors = pool.filter(p=>p.en!==correct.en).sort(()=>0.5-Math.random()).slice(0,1);
   const options = [correct, ...distractors].sort(()=>0.5-Math.random());
   quizCurrent = { correct, options };
   document.getElementById('quizQ').textContent = correct.q;
