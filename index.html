@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>English Practice Hub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --black:#0a0a0a;
+    --surface:#141414;
+    --surface-2:#1c1c1c;
+    --border:rgba(242,240,234,0.14);
+    --border-soft:rgba(242,240,234,0.08);
+    --pearl:#f2f0ea;
+    --pearl-dim:rgba(242,240,234,0.5);
+    --pearl-faint:rgba(242,240,234,0.32);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--black);
+    color:var(--pearl);
+    font-family:'IBM Plex Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:28px 20px 90px;}
+
+  header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--pearl-faint);margin-bottom:10px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:clamp(26px,5vw,36px);margin:0 0 6px;line-height:1.08;letter-spacing:-.01em;
+  }
+  .sub{color:var(--pearl-dim);font-size:14px;max-width:52ch;line-height:1.5;}
+  .streak{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;color:var(--pearl-dim);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:8px 14px;
+    white-space:nowrap;
+  }
+  .streak b{color:var(--pearl);}
+
+  /* tab nav */
+  .tabs{
+    display:flex;gap:4px;flex-wrap:wrap;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:4px;
+    margin-bottom:20px;
+  }
+  .tabs button{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;letter-spacing:.03em;
+    border:none;background:transparent;color:var(--pearl-dim);
+    padding:10px 14px;border-radius:8px;cursor:pointer;
+    transition:all .15s;flex:1;min-width:110px;
+  }
+  .tabs button.active{background:var(--pearl);color:var(--black);font-weight:600;}
+  .tabs button:not(.active):hover{color:var(--pearl);background:var(--surface-2);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* mode switcher (Library/Quiz/Typing/Voice) */
+  .switcher{
+    display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:4px;gap:4px;margin-bottom:16px;
+  }
+  .switcher button{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;
+    border:none;background:transparent;color:var(--pearl-dim);
+    padding:8px 18px;border-radius:999px;cursor:pointer;transition:all .15s;
+  }
+  .switcher button.active{background:var(--pearl);color:var(--black);font-weight:600;}
+  .switcher button:not(.active):hover{color:var(--pearl);}
+
+  /* search (library) */
+  .console{
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    display:flex;align-items:center;gap:10px;padding:13px 15px;margin-bottom:16px;
+  }
+  .console:focus-within{border-color:var(--pearl-dim);}
+  .prompt{font-family:'IBM Plex Mono',monospace;color:var(--pearl-faint);font-size:15px;}
+  .console input{flex:1;background:transparent;border:none;outline:none;color:var(--pearl);font-family:'IBM Plex Mono',monospace;font-size:15px;}
+  .console input::placeholder{color:var(--pearl-faint);}
+  .count{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--pearl-faint);white-space:nowrap;}
+
+  /* category accordion (library) */
+  section.category{margin-top:14px;border:1px solid var(--border-soft);border-radius:12px;overflow:hidden;background:var(--surface);}
+  .cat-head{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;user-select:none;}
+  .cat-head:hover{background:var(--surface-2);}
+  .cat-index{font-family:'IBM Plex Mono',monospace;color:var(--pearl-faint);font-size:12px;flex-shrink:0;}
+  .cat-title-wrap{flex:1;}
+  .cat-title{font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--pearl);}
+  .cat-note{font-size:12.5px;color:var(--pearl-dim);margin-top:3px;line-height:1.4;}
+  .cat-arrow{font-family:'IBM Plex Mono',monospace;color:var(--pearl-faint);font-size:13px;transition:transform .2s;flex-shrink:0;}
+  section.category.open .cat-arrow{transform:rotate(90deg);color:var(--pearl);}
+  .cards{display:grid;gap:1px;background:var(--border-soft);max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  section.category.open .cards{max-height:9000px;}
+  .card{background:var(--surface);padding:16px 18px 15px 18px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--pearl-faint);padding-top:3px;white-space:nowrap;}
+  .content .q{font-size:12.5px;font-style:italic;color:var(--pearl-faint);margin:0 0 6px;line-height:1.4;}
+  .content .q .qlabel{font-family:'IBM Plex Mono',monospace;font-style:normal;letter-spacing:.06em;color:var(--pearl-faint);margin-right:6px;}
+  .content .en{font-size:15.5px;line-height:1.5;color:var(--pearl);margin:0 0 7px;}
+  .content .tl{font-size:13px;line-height:1.55;color:var(--pearl-dim);margin:0;}
+  .content .tl b{color:var(--pearl);font-weight:600;}
+  .empty{text-align:center;padding:60px 20px;color:var(--pearl-faint);font-family:'IBM Plex Mono',monospace;font-size:13px;}
+
+  /* quiz / typing card */
+  .drill-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:26px 24px;text-align:center;
+  }
+  .drill-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--pearl-faint);margin-bottom:10px;}
+  .drill-q{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1.4;margin:0 0 22px;}
+  .options{display:grid;gap:10px;text-align:left;}
+  .option{
+    background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+    padding:13px 16px;cursor:pointer;font-size:14.5px;line-height:1.4;transition:all .15s;
+  }
+  .option:hover{border-color:var(--pearl-dim);}
+  .option.correct{border-color:var(--pearl);background:var(--pearl);color:var(--black);font-weight:600;}
+  .option.wrong{border-color:var(--pearl-faint);opacity:.4;text-decoration:line-through;}
+  .option.disabled{cursor:default;}
+  .drill-actions{display:flex;justify-content:center;gap:10px;margin-top:20px;}
+  .btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.04em;
+    background:transparent;border:1px solid var(--border);color:var(--pearl-dim);
+    padding:11px 20px;border-radius:8px;cursor:pointer;transition:all .15s;
+  }
+  .btn:hover{border-color:var(--pearl-dim);color:var(--pearl);}
+  .btn.primary{background:var(--pearl);color:var(--black);border-color:var(--pearl);font-weight:600;}
+  .btn.primary:hover{opacity:.85;}
+  .score{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--pearl-faint);text-align:center;margin-bottom:14px;}
+
+  .type-area{
+    width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;
+    color:var(--pearl);font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;padding:13px 15px;
+    min-height:70px;resize:vertical;outline:none;
+  }
+  .type-area:focus{border-color:var(--pearl-dim);}
+  .reveal{
+    margin-top:18px;text-align:left;background:var(--surface-2);border:1px solid var(--border-soft);
+    border-radius:10px;padding:16px 18px;
+  }
+  .reveal .lbl{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pearl-faint);margin-bottom:6px;}
+  .reveal .best{font-size:15px;color:var(--pearl);margin:0 0 10px;line-height:1.5;}
+  .reveal .yours{font-size:13.5px;color:var(--pearl-dim);margin:0 0 10px;font-style:italic;}
+  .reveal .tl{font-size:13px;color:var(--pearl-dim);margin:0;line-height:1.5;}
+  .reveal .tl b{color:var(--pearl);}
+
+  /* voice list */
+  .voice-row{
+    background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+    padding:14px 16px;margin-bottom:10px;
+  }
+  .voice-target{font-size:15px;color:var(--pearl);margin:0 0 10px;line-height:1.45;}
+  .voice-controls{display:flex;gap:8px;flex-wrap:wrap;}
+  .voice-result{
+    margin-top:10px;font-size:13px;color:var(--pearl-dim);
+    border-top:1px dashed var(--border);padding-top:10px;
+  }
+  .voice-result b{color:var(--pearl);}
+  .unsupported{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--pearl-faint);text-align:center;padding:30px;border:1px dashed var(--border);border-radius:12px;}
+
+  /* mistake / vocab / idiom grids */
+  .flat-card{
+    background:var(--surface);border:1px solid var(--border-soft);border-radius:10px;
+    padding:16px 18px;margin-bottom:10px;
+  }
+  .wrong-line{font-size:14px;color:var(--pearl-dim);text-decoration:line-through;margin:0 0 5px;}
+  .wrong-line .x{font-family:'IBM Plex Mono',monospace;color:var(--pearl-faint);margin-right:6px;text-decoration:none;}
+  .right-line{font-size:15.5px;color:var(--pearl);margin:0 0 8px;}
+  .right-line .ck{font-family:'IBM Plex Mono',monospace;color:var(--pearl);margin-right:6px;}
+  .note{font-size:13px;color:var(--pearl-dim);margin:0;line-height:1.5;}
+
+  .vocab-term{font-family:'Fraunces',serif;font-size:16.5px;font-weight:600;color:var(--pearl);margin:0 0 5px;}
+  .vocab-meaning{font-size:13.5px;color:var(--pearl-dim);margin:0 0 8px;line-height:1.5;}
+  .vocab-example{font-size:13px;color:var(--pearl-faint);font-style:italic;margin:0;}
+
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--border-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--pearl-faint);text-align:center;}
+
+  @media (max-width:520px){
+    .card{grid-template-columns:1fr;}
+    .tag{order:2;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="eyebrow">English Practice Hub</div>
+      <h1 id="pageTitle">Practice Hub</h1>
+      <p class="sub" id="pageSub">Reference, quiz, typing, and speaking practice — all in one place, no AI, no cost.</p>
+    </div>
+    <div class="streak" id="streakBadge">🔥 <b>0</b>-day streak</div>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button data-tab="library" class="active">📚 Library</button>
+    <button data-tab="quiz">🎯 Quiz</button>
+    <button data-tab="typing">⌨️ Typing</button>
+    <button data-tab="voice">🔊 Voice</button>
+    <button data-tab="mistakes">⚠️ Mistakes</button>
+    <button data-tab="vocab">📖 Vocabulary</button>
+    <button data-tab="idioms">💬 Idioms</button>
+  </div>
+
+  <!-- LIBRARY -->
+  <div class="panel active" id="panel-library">
+    <div class="switcher" id="libSwitcher">
+      <button class="active" data-mode="work">WORK</button>
+      <button data-mode="life">EVERYDAY REAL LIFE</button>
+    </div>
+    <div class="console">
+      <span class="prompt">&gt;</span>
+      <input id="search" type="text" placeholder="Search a phrase, a word, or a situation…" autocomplete="off">
+      <span class="count" id="resultCount"></span>
+    </div>
+    <div id="categories"></div>
+    <div class="empty" id="emptyState" style="display:none;">No matches. Try a different word.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="panel" id="panel-quiz">
+    <div class="switcher" id="quizSwitcher">
+      <button class="active" data-mode="work">WORK</button>
+      <button data-mode="life">EVERYDAY REAL LIFE</button>
+    </div>
+    <div class="score" id="quizScore">Score: 0 / 0</div>
+    <div class="drill-card">
+      <div class="drill-label">What's the best reply to this?</div>
+      <p class="drill-q" id="quizQ">Loading…</p>
+      <div class="options" id="quizOptions"></div>
+      <div class="drill-actions">
+        <button class="btn primary" id="quizNext">Next Question →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPING -->
+  <div class="panel" id="panel-typing">
+    <div class="switcher" id="typeSwitcher">
+      <button class="active" data-mode="work">WORK</button>
+      <button data-mode="life">EVERYDAY REAL LIFE</button>
+    </div>
+    <div class="drill-card" style="text-align:left;">
+      <div class="drill-label" style="text-align:center;">Type your best answer</div>
+      <p class="drill-q" style="text-align:center;" id="typeQ">Loading…</p>
+      <textarea class="type-area" id="typeInput" placeholder="Type your answer here…"></textarea>
+      <div class="drill-actions">
+        <button class="btn" id="typeReveal">Show Best Answer</button>
+        <button class="btn primary" id="typeNext">Next →</button>
+      </div>
+      <div class="reveal" id="typeRevealBox" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- VOICE -->
+  <div class="panel" id="panel-voice">
+    <div class="switcher" id="voiceSwitcher">
+      <button class="active" data-mode="work">WORK</button>
+      <button data-mode="life">EVERYDAY REAL LIFE</button>
+    </div>
+    <div id="voiceUnsupported" class="unsupported" style="display:none;">
+      Speech recognition isn't supported on this browser. Try Chrome on desktop or Android. Listen playback will still work.
+    </div>
+    <div id="voiceList"></div>
+  </div>
+
+  <!-- MISTAKES -->
+  <div class="panel" id="panel-mistakes">
+    <div id="mistakesList"></div>
+  </div>
+
+  <!-- VOCAB -->
+  <div class="panel" id="panel-vocab">
+    <div id="vocabList"></div>
+  </div>
+
+  <!-- IDIOMS -->
+  <div class="panel" id="panel-idioms">
+    <div id="idiomsList"></div>
+  </div>
+
+  <footer>johnboydesign — private phrase log, saved on this device</footer>
+</div>
+
+<script>
+/* ============ PHRASE DATA (shared across Library / Quiz / Typing / Voice) ============ */
+const DATA = [
+  { id:"err", mode:"work", title:"Errors &amp; Delays", note:"Kapag may problema o na-late — paano mo ipapakita na kontrolado mo ito, hindi ka nagpapanic.",
+    phrases:[
+      { q:"Can you fix this error immediately?", en:"Thanks for flagging this — I'm looking into it now and I'll update you within the hour.", tl:"<b>Flagging</b> = pag-report ng issue. \"Looking into it\" mas seryoso ang dating kaysa \"checking.\"" },
+      { q:"What caused this issue?", en:"I found what caused it — here's the fix, and here's how I'll make sure it doesn't happen again.", tl:"Tatlong parte: cause, fix, prevention." },
+      { q:"Is everything okay now?", en:"This should be resolved now, but I'll keep monitoring it for the next 24 hours to be safe.", tl:"<b>Monitoring</b> = patuloy na sinusubaybayan." },
+      { q:"Why did this keep happening?", en:"Let me trace this back to the source so we're fixing the real issue, not just the symptom.", tl:"<b>Trace back to the source</b> = hanapin ang ugat ng problema." },
+      { q:"Is it fully fixed already?", en:"I want to double-check everything before I tell you it's fully fixed.", tl:"Ipinapakita na maingat ka." },
+      { q:"Did you already fix the broken part?", en:"I've already rolled back the change, so everything's back to normal while I work on a permanent fix.", tl:"<b>Rolled back</b> = binalik sa dating maayos na bersyon." },
+      { q:"Why is this taking longer than expected?", en:"This turned out to be a bigger issue than it looked, so I want to take a bit more time to get it right.", tl:"Honest na paraan sabihing mas malaki pala ang problema." },
+      { q:"Did this affect anything on my end?", en:"I caught this before it affected anything on your end — just wanted to keep you in the loop.", tl:"<b>Keep you in the loop</b> = panatilihing updated ka." },
+      { q:"Can we use the system while you fix it?", en:"Here's a quick workaround for now while I work on the permanent fix.", tl:"<b>Workaround</b> = pansamantalang solusyon." },
+      { q:"Whose fault was this?", en:"I take full responsibility for this — here's exactly what I'm doing to correct it.", tl:"Malakas na paraan mag-own ng pagkakamali." }
+    ]
+  },
+  { id:"files", mode:"work", title:"Asking a Client for Files or Info", note:"Paano humingi ng files, logo, credentials, o kahit anong kailangan mo sa client nang hindi nakaka-awkward.",
+    phrases:[
+      { q:"Do you need anything from me?", en:"Could you send me the logo files when you get a chance? I need them to move forward with the design.", tl:"\"When you get a chance\" = walang pressure pero malinaw ang need mo." },
+      { q:"What's left before you can finish?", en:"I'm just missing one thing from you — could you share your brand colors or a file I can pull them from?", tl:"Ipinapaalam na iisa na lang ang kulang." },
+      { q:"When do you need this by?", en:"To keep things on track, I'll need this from you by [date] — otherwise the timeline might shift.", tl:"May dependency ang timeline sa kanila." },
+      { q:"Sorry, I haven't sent that yet.", en:"No rush on this — but once I have it, I can finish the rest of the setup.", tl:"Relaxed ang dating pero may kasunod na step." },
+      { q:"Did you get the document I mentioned?", en:"Just a quick follow-up — were you able to find that document I asked for last week?", tl:"\"Quick follow-up\" ang softener." },
+      { q:"Is there anything else you need?", en:"Whenever it's convenient, could you also send over your business hours and contact number?", tl:"Walang deadline pressure, request lang na dagdag." },
+      { q:"I haven't picked a logo yet.", en:"I'll go ahead and use a placeholder for now — just replace it once you send the real one.", tl:"May ginagawa ka na habang wala pa sila." },
+      { q:"What's holding up the project?", en:"Quick heads up — I still need [item] from you to close this task out.", tl:"Malinaw na sinasabi mo ang bara sa pagtapos." },
+      { q:"How should I send the files?", en:"If it's easier, you can just drop the files in our shared folder.", tl:"Nag-aalok ka ng mas madaling paraan." },
+      { q:"I'm not sure what file type you need.", en:"Let me know if you're not sure what format to send it in — I can guide you.", tl:"Okay lang tumulong ka." }
+    ]
+  },
+  { id:"scope", mode:"work", title:"Setting Scope &amp; Expectations", note:"Kapag may bagong request na lampas sa napag-usapan, o kailangan mong protektahan ang timeline.",
+    phrases:[
+      { q:"Can we add this new feature today?", en:"That's a great idea — let's scope it out properly so we don't rush it and break something else.", tl:"<b>Scope it out</b> = pag-aralan muna kung gaano kalaki ang trabaho." },
+      { q:"Can you just do this quickly? It's a small change.", en:"I want to make sure we test this properly first, since it could affect the parts that already work.", tl:"Iniisip mo ang buong picture." },
+      { q:"Can you also add [extra feature] while you're at it?", en:"This is a bit outside what we originally scoped — let's talk about timeline and cost before I start.", tl:"Dagdag na trabaho ito." },
+      { q:"What exactly are we paying for in this phase?", en:"Here's what's included in this phase, and here's what we can plan for the next one.", tl:"Parang menu lang." },
+      { q:"Can this be done by tomorrow?", en:"Let's set a realistic timeline for this so the quality doesn't suffer.", tl:"Pinoprotektahan mo ang output." },
+      { q:"Can we add this idea too?", en:"Happy to explore that, but let's keep it as a separate item so it doesn't delay what we already promised.", tl:"In-iisolate mo para hindi maapektuhan ang commitment." },
+      { q:"Will this change the deadline?", en:"If we add this now, it might push back the deadline by a few days — want me to proceed anyway?", tl:"Binibigyan mo sila ng trade-off." },
+      { q:"Can you start on the new request now?", en:"Let's finish what's on our plate first, then tackle this next.", tl:"Mag-prioritize nang hindi tinatanggihan ang idea." },
+      { q:"How much will the extra feature cost?", en:"I'll put together a quick estimate for this add-on so you can decide.", tl:"<b>Add-on</b> = dagdag na trabaho." },
+      { q:"We need to change the whole strategy.", en:"This falls outside our current agreement, so let's align on the details before I start.", tl:"I-flag na kailangan munang mag-usap." }
+    ]
+  },
+  { id:"updates", mode:"work", title:"Giving Project Updates", note:"Kapag tinatanong ka \"kumusta na,\" \"tapos na ba,\" o gusto lang nila ng status.",
+    phrases:[
+      { q:"How's the project going?", en:"Quick update: we're on track, everything's moving as planned.", tl:"Mabilis at direkta." },
+      { q:"Can you give me a status report?", en:"Here's where we are right now, and here's what's next.", tl:"Dalawang parte lang." },
+      { q:"Is the project ready yet?", en:"We're in the final testing phase right now, making sure everything performs well before we go live.", tl:"Mas propesyonal kaysa \"I'm just checking it.\"" },
+      { q:"Why hasn't this been delivered yet?", en:"This might take a little longer than planned — here's why, and here's the new timeline.", tl:"Sabihin ang dahilan at bagong date." },
+      { q:"Are we ready to launch?", en:"Everything's ready — I just need your final approval to launch.", tl:"Malinaw na tanong." },
+      { q:"Any updates this week?", en:"Nothing major to report — just steady progress on our end.", tl:"Routine check-in lang." },
+      { q:"Did anything go wrong this week?", en:"I hit a small snag, but it's already handled.", tl:"<b>Snag</b> = maliit na problema." },
+      { q:"Are we still on schedule?", en:"We're ahead of schedule, so we might be able to deliver a bit earlier than planned.", tl:"Diretso, hindi overpromise." },
+      { q:"Can you keep me posted regularly?", en:"I'll send you a short summary at the end of each week so you're always up to date.", tl:"Regular cadence ng updates." },
+      { q:"Do you need anything from me to keep moving?", en:"Everything's tracking well — no blockers on my side right now.", tl:"<b>Blockers</b> = humahadlang sa progress." }
+    ]
+  },
+  { id:"feedback", mode:"work", title:"Receiving Feedback &amp; Revisions", note:"Kapag may comment ang client na parang hindi maganda, paano ka sasagot nang hindi defensive.",
+    phrases:[
+      { q:"This doesn't look like what I expected.", en:"Thanks for the honest feedback — could you tell me a bit more about what feels off?", tl:"Tinatanggap mo nang buo, hinihingan ng specifics." },
+      { q:"Can you change this part?", en:"That makes sense — let me revise this and send you an updated version.", tl:"Simple, direkta sa aksyon." },
+      { q:"I don't think this is quite right.", en:"I appreciate you pointing that out. I'll adjust it and get it back to you today.", tl:"May timeline (\"today\")." },
+      { q:"It's just not what I had in mind.", en:"I want this to feel right for you — can you show me an example of what you have in mind?", tl:"Hingi ka ng reference." },
+      { q:"You missed something here.", en:"Good catch — I missed that. Fixing it now.", tl:"Maikli, honest." },
+      { q:"I like most of it, but this one part feels off.", en:"I see what you mean — let's tweak this part and keep the rest as is.", tl:"Hindi mo babaguhin lahat." },
+      { q:"This isn't working for me.", en:"Totally fair point. Give me a day to rework this.", tl:"Malumanay na paraan humingi ng oras." },
+      { q:"I'm not sure which direction to go.", en:"Would you prefer I go bolder, or keep it closer to the original direction?", tl:"Dalawang klarong option." },
+      { q:"Can you remember this for next time?", en:"Noted — I'll incorporate that in the next version.", tl:"Maikli at propesyonal." },
+      { q:"I keep explaining but you're not getting it.", en:"Let's do a quick call so I can understand exactly what you're picturing.", tl:"Mag-alok ka ng call." }
+    ]
+  },
+  { id:"boundaries", mode:"work", title:"Saying No, Nicely", note:"Kapag may hiling na hindi mo magagawa, o hindi maganda kung gagawin agad.",
+    phrases:[
+      { q:"Can you just do this quickly? It's a small change.", en:"I can do that, but it might affect the timeline — is that okay with you?", tl:"Binibigyan mo sila ng trade-off." },
+      { q:"Can we do this right now?", en:"I'd recommend we hold off on that for now — here's why.", tl:"<b>Hold off</b> = ipagpaliban muna." },
+      { q:"Can you guarantee this will work perfectly?", en:"That's not something I can guarantee, but here's what I can do instead.", tl:"Honest sa limitasyon." },
+      { q:"Can we try a totally different idea today?", en:"Let's stick to the plan for this phase and revisit that idea next round.", tl:"Pinoprotektahan mo ang focus." },
+      { q:"Is this really going to work the way I want?", en:"I want to be upfront with you — that might not be the best move right now.", tl:"<b>Upfront</b> = tapat at diretso." },
+      { q:"Can you promise this will be done by Friday?", en:"I want to set the right expectations here, rather than promise something I might not deliver.", tl:"Mas mabuti ang malinaw." },
+      { q:"Can we launch the full version right away?", en:"Let's test the waters with a smaller version first before committing fully.", tl:"<b>Test the waters</b> = subukan muna nang maliit." },
+      { q:"Will everything be perfect on the first try?", en:"I'd rather be honest with you now than disappoint you later.", tl:"Hindi realistic ang inaasahan." },
+      { q:"Can this still be done by the original deadline?", en:"That's possible, but it'll need extra time — is the current deadline still a priority?", tl:"Trade-off sa oras at kalidad." },
+      { q:"Can you handle this AND the other task at the same time?", en:"I can prioritize this, but something else will need to move. Which one matters more right now?", tl:"Binabalik mo ang desisyon sa client." }
+    ]
+  },
+  { id:"followup", mode:"work", title:"Following Up (Payment, Approval, Files)", note:"Kapag tumahimik ang client at kailangan mong i-remind sila nang hindi parang nangungulit.",
+    phrases:[
+      { q:"[No reply after sending a proposal]", en:"Just checking in — were you able to review the proposal I sent last week?", tl:"Mas malumanay kaysa \"reminder.\"" },
+      { q:"Sorry, I've been busy, haven't checked yet.", en:"Following up on this in case it got buried in your inbox.", tl:"Benefit of the doubt." },
+      { q:"I'll let you know once I'm ready.", en:"Once I get your go-signal, I can start right away.", tl:"<b>Go-signal</b> = ang final na oo." },
+      { q:"Oh, I forgot about the invoice.", en:"Hi — just a gentle reminder about the invoice from last week.", tl:"<b>Gentle reminder</b> ang softener." },
+      { q:"Is there anything you need from me?", en:"Let me know if you need anything else from me to move this forward.", tl:"Nasa kanila na ang bola." },
+      { q:"Sorry for the late reply.", en:"Circling back on this — happy to jump on a quick call if that's easier.", tl:"<b>Circling back</b> = bumabalik sa topic." },
+      { q:"Did you get my last message?", en:"Just making sure this didn't slip through the cracks.", tl:"<b>Slip through the cracks</b> = nakalimutan." },
+      { q:"I'm still deciding, give me some time.", en:"Whenever you're ready, I'm ready to move forward.", tl:"Walang pressure pero malinaw." },
+      { q:"We haven't heard back from you in a while.", en:"I'll go ahead and pause here until I hear back from you.", tl:"Hinihintay ka lang nila." },
+      { q:"It's been quiet this week.", en:"Wanted to touch base before the week ends — any updates on your end?", tl:"<b>Touch base</b> = mag-check in." }
+    ]
+  },
+  { id:"negotiate", mode:"work", title:"Negotiating Rate &amp; Budget", note:"Kapag pinag-uusapan ang presyo o badyet — paano ka mananatiling propesyonal.",
+    phrases:[
+      { q:"Can you lower your rate?", en:"I want to be fair to both of us — let's see if we can adjust the scope instead of the rate.", tl:"Ibang paraan imbes na basta sumang-ayon o tumanggi." },
+      { q:"How much will this cost?", en:"Based on what we discussed, here's a breakdown of the cost so you can see exactly what's included.", tl:"<b>Breakdown</b> = detalyadong paghahati ng gastos." },
+      { q:"Is this your best price?", en:"This is priced based on the scope we agreed on — if the scope changes, the price can too.", tl:"May basehan ang presyo." },
+      { q:"Can we start with a smaller budget?", en:"Sure, let's scale it down to fit your budget and build from there.", tl:"<b>Scale it down</b> = paliitin ang saklaw." },
+      { q:"Why is this more expensive than before?", en:"This includes a few things that weren't part of the original scope, so the price reflects that.", tl:"Malinaw na paliwanag." },
+      { q:"Can you do this for free as a favor?", en:"I appreciate you thinking of me — let's talk about a rate that works for both of us.", tl:"Tumanggi nang hindi masakit ang loob." },
+      { q:"What's included in this package?", en:"Here's exactly what's covered, and here's what would be considered an add-on.", tl:"Paghihiwalay ng included at add-on." },
+      { q:"Can we negotiate the payment terms?", en:"I'm open to that — what did you have in mind?", tl:"Bukas sa usapan." }
+    ]
+  },
+  { id:"onboarding", mode:"work", title:"Onboarding a New Client", note:"Pagsisimula ng bagong project — paano mo sisimulan ang relasyon nang maayos.",
+    phrases:[
+      { q:"What happens after I sign?", en:"Once everything's signed, I'll send over a short onboarding form so I can get to know your business better.", tl:"<b>Onboarding form</b> = simpleng form." },
+      { q:"What do you need from me to get started?", en:"To kick things off, I'll just need access to your accounts and a quick call to align on goals.", tl:"<b>Kick things off</b> = simulan." },
+      { q:"How long will this take?", en:"Typically this takes about [X weeks], but I'll give you a clearer timeline after our first call.", tl:"Estimate lang, hindi pangako." },
+      { q:"What should I expect from working with you?", en:"I'll keep you updated regularly and flag anything early, so there won't be any surprises.", tl:"Nagse-set ng expectations." },
+      { q:"Can we hop on a call first?", en:"Absolutely, let's set up a short call this week to go over everything.", tl:"Simple at accommodating." },
+      { q:"Who do I contact if I have questions?", en:"You can reach me directly here, and I usually respond within a business day.", tl:"Malinaw na channel at response time." },
+      { q:"Do you work with a contract?", en:"Yes, I'll send over an agreement that outlines the scope, timeline, and payment terms.", tl:"Propesyonal na paraan." },
+      { q:"What's the first step?", en:"The first step is a quick discovery call so I understand your goals before we touch anything.", tl:"<b>Discovery call</b> = unang pag-uusap." }
+    ]
+  },
+  { id:"handoff", mode:"work", title:"Wrapping Up a Project / Handoff", note:"Pagtapos ng project — paano mo isasara nang maayos.",
+    phrases:[
+      { q:"Is the project officially done now?", en:"Everything's completed and tested — I'll walk you through it so you're comfortable running it on your own.", tl:"<b>Walk you through</b> = gabayan hakbang-hakbang." },
+      { q:"What if something breaks after this?", en:"I'll include a short guide, and I'm here if you need any support after launch.", tl:"Seguridad na hindi ka basta mawawala." },
+      { q:"Can you train my team on this?", en:"Sure, I can put together a short walkthrough video or a live session, whichever works better for your team.", tl:"Dalawang paraan, flexible." },
+      { q:"Do we need to do anything else?", en:"Just a final review on your end, and once you approve, we can officially close this out.", tl:"Malinaw na huling hakbang." },
+      { q:"What happens if I want more work done later?", en:"Just reach out anytime — I'm happy to help with the next phase whenever you're ready.", tl:"Bukas ang pinto para sa future work." },
+      { q:"Can you give me all the files and access?", en:"Of course, I'll transfer everything over and send you a checklist of what's included.", tl:"<b>Checklist</b> = listahan." },
+      { q:"How do I know everything is working properly?", en:"Here's a quick checklist you can go through to confirm everything's running smoothly.", tl:"Tool para ma-verify nila mismo." },
+      { q:"Thank you for the great work!", en:"It was a pleasure working on this with you — let me know if you ever need anything down the line.", tl:"<b>Down the line</b> = sa hinaharap." }
+    ]
+  },
+  { id:"calls", mode:"life", title:"Calls, Meetings &amp; Introductions", note:"Sa simula ng usapan, video call, o pag-uusap na medyo formal.",
+    phrases:[
+      { q:"What do you say when you didn't hear something clearly on a call?", en:"Sorry, could you repeat that? I didn't quite catch it.", tl:"Mas natural kaysa \"what?\" o \"ha?\"" },
+      { q:"What do you say when you meet someone for the first time?", en:"Nice to meet you — I've heard a lot about you.", tl:"Pambungad sa unang beses mong makilala ang isang tao." },
+      { q:"What do you say to check the audio before starting a meeting?", en:"Can everyone hear me okay?", tl:"Simpleng paraan i-check ang audio." },
+      { q:"What do you say when you and someone else talk at the same time?", en:"Sorry, you go first — I think we spoke at the same time.", tl:"Ginagamit kapag magkasabay kayong nagsalita." },
+      { q:"What do you say when continuing a conversation that got interrupted?", en:"Let's pick this up where we left off.", tl:"Ipagpapatuloy ang usapan na naantala." },
+      { q:"What do you say if some attendees haven't joined yet?", en:"Let's give it a minute in case anyone else wants to join.", tl:"Bago simulan ang meeting." },
+      { q:"What do you say before sharing your screen on a call?", en:"I'll share my screen now, let me know if you can see it clearly.", tl:"Standard na linya bago mag-screen share." },
+      { q:"What do you say when your connection drops for a moment?", en:"Sorry, I got cut off there for a second — could you go back a bit?", tl:"<b>Cut off</b> = naputol ang koneksyon." },
+      { q:"What do you say when ending a first meeting with someone new?", en:"Great meeting you — let's definitely keep in touch.", tl:"Magandang pang-closing." },
+      { q:"What do you say near the end of a meeting?", en:"Before we wrap up, does anyone have any questions?", tl:"<b>Wrap up</b> = tapusin." }
+    ]
+  },
+  { id:"smalltalk", mode:"life", title:"Small Talk &amp; Casual Chat", note:"Yung mga simpleng usapan bago o pagkatapos ng meeting, o sa break room.",
+    phrases:[
+      { q:"What's a natural way to start small talk with a coworker?", en:"How's your day going so far?", tl:"Mas natural kaysa \"how are you\" paulit-ulit." },
+      { q:"How do you respond when someone tells you about a stressful day?", en:"That sounds exhausting — are you doing okay?", tl:"Magpakita ng concern nang hindi sobrang seryoso." },
+      { q:"How do you naturally agree with what someone just said?", en:"I know, right? I was thinking the same thing.", tl:"Parang \"ay oo nga.\"" },
+      { q:"How do you naturally change the topic in a casual conversation?", en:"By the way, have you tried that new place near the office?", tl:"\"By the way\" ang natural na shift." },
+      { q:"How do you politely end a small talk conversation?", en:"Anyway, I should probably get back to it.", tl:"Magalang na paraan tapusin ang small talk." },
+      { q:"What's a common question to ask before the weekend?", en:"Any plans for the weekend?", tl:"Karaniwang pambukas ng usapan." },
+      { q:"How do you respond honestly when someone asks how you're doing early in the morning?", en:"I'm still trying to wake up, to be honest.", tl:"Light at relatable na sagot." },
+      { q:"How do you show genuine interest in what someone is telling you?", en:"That's actually really interesting — tell me more.", tl:"Genuine interest sa kwento." },
+      { q:"How do you relate to someone who says they had a tiring week?", en:"Same here, it's been a long week.", tl:"Sumang-ayon at magbahagi." },
+      { q:"How do you end a casual catch-up conversation?", en:"It was nice catching up — let's talk again soon.", tl:"<b>Catching up</b> = pag-uusap tungkol sa mga nangyari." }
+    ]
+  },
+  { id:"outabout", mode:"life", title:"Out and About", note:"Pag-order ng pagkain, pamimili, o paghingi ng direksyon sa labas.",
+    phrases:[
+      { q:"What do you say when ordering food to take home?", en:"Could I get this to go, please?", tl:"Ginagamit kapag bibili ng pagkaing dadalhin." },
+      { q:"What do you ask a store staff about sizing?", en:"Do you have this in a different size?", tl:"Simple at direktang tanong." },
+      { q:"How do you ask a stranger for directions?", en:"Excuse me, is this the right way to [place]?", tl:"Natural na paraan humingi ng direksyon." },
+      { q:"What do you say when you haven't decided your order yet?", en:"I'll just have the same as him/her.", tl:"Kapag susunod ka na lang." },
+      { q:"What do you ask before paying at a small shop?", en:"Can I pay by card, or is it cash only?", tl:"Mabilis na tanong bago pumila." },
+      { q:"What do you ask a waiter when you can't decide what to order?", en:"Could I get a recommendation? I'm not sure what to order.", tl:"Natural na paraan humingi ng suggestion." },
+      { q:"What do you ask when entering a restaurant?", en:"Is there a wait, or can we be seated right away?", tl:"Tanong pagpasok sa restaurant." },
+      { q:"How do you ask for changes to your food order?", en:"Could you make that a bit less spicy, please?", tl:"Magalang na paraan mag-request." },
+      { q:"How do you politely point out a billing mistake?", en:"I think I'm being charged for something I didn't order.", tl:"Calm at direktang paraan." },
+      { q:"How do you ask locals for nearby establishments?", en:"Do you know if there's a pharmacy nearby?", tl:"Karaniwang tanong sa lugar na hindi mo pamilyar." }
+    ]
+  },
+  { id:"schedule", mode:"life", title:"Scheduling &amp; Everyday Requests", note:"Pag-aayos ng oras, o kapag may biglaang lumitaw na dapat ilipat.",
+    phrases:[
+      { q:"How do you respond when someone suggests meeting up?", en:"That works for me — what time were you thinking?", tl:"Sumang-ayon tapos itanong pa rin ang detalye." },
+      { q:"What do you say when you're not sure of your availability yet?", en:"I'll have to check my schedule and get back to you.", tl:"Natural na sagot kapag hindi ka sigurado." },
+      { q:"How do you ask to reschedule at the last minute?", en:"Could we push this to tomorrow? Something urgent just came up.", tl:"<b>Push to</b> = ilipat ang schedule." },
+      { q:"How do you offer an alternative schedule?", en:"Would sometime next week work better for you?", tl:"Magalang na paraan mag-alok." },
+      { q:"How do you respond when someone wants a firm plan but you'd rather stay flexible?", en:"Let's just play it by ear and see how the day goes.", tl:"<b>Play it by ear</b> = walang mahigpit na plano." },
+      { q:"How do you state your time preference for a meeting?", en:"Mornings usually work better for me, if that's an option.", tl:"Direktang paraan sabihin ang preference." },
+      { q:"What do you say when you know you'll arrive late?", en:"I might be a few minutes late — please start without me.", tl:"Alam mong medyo mahuhuli ka." },
+      { q:"How do you suggest a different meeting format?", en:"Can we do a quick call instead of meeting in person?", tl:"Alternatibong format." },
+      { q:"How do you respond when asked for your preferred time?", en:"I'm flexible, whatever time works best for you.", tl:"Accommodation sa schedule ng iba." },
+      { q:"How do you set a tentative schedule?", en:"Let's pencil it in for now and confirm closer to the date.", tl:"<b>Pencil it in</b> = tentative na schedule muna." }
+    ]
+  },
+  { id:"awkward", mode:"life", title:"Handling Awkward Moments", note:"Paghingi ng paumanhin, o pag-clear ng hindi pagkakaunawaan.",
+    phrases:[
+      { q:"How do you respond when someone apologizes to you?", en:"No worries at all — take your time.", tl:"Kapag humihingi ng paumanhin sa iyo ang kausap." },
+      { q:"How do you casually apologize for a small mistake?", en:"My bad, I completely forgot about that.", tl:"Casual na paraan mag-sorry." },
+      { q:"What do you say when someone misunderstood what you meant?", en:"I didn't mean it that way — let me explain.", tl:"Kapag na-misinterpret ang sinabi mo." },
+      { q:"How do you point out a misunderstanding without blaming anyone?", en:"I think there might be a bit of a misunderstanding.", tl:"Malumanay, walang sisihan." },
+      { q:"How do you reset a conversation that went off track?", en:"Let's just start over, shall we?", tl:"I-reset ang usapan na parang nagulo." },
+      { q:"How do you own up to a mistake you made?", en:"That's on me, I should've double-checked before sending it.", tl:"Malinaw na pag-amin." },
+      { q:"How do you reassure someone after a small conflict?", en:"No hard feelings — these things happen.", tl:"Pakalmahin ang sitwasyon." },
+      { q:"How do you thank someone for their patience?", en:"I appreciate you being patient with me on this.", tl:"Pasasalamat sa katiyagaan." },
+      { q:"What do you say when your first explanation wasn't clear?", en:"Let me try explaining that a different way.", tl:"Hindi naintindihan ang unang paliwanag." },
+      { q:"How do you resolve a disagreement that's really just a misunderstanding?", en:"I think we're saying the same thing, just in different words.", tl:"Tapusin nang mapayapa." }
+    ]
+  },
+  { id:"doctor", mode:"life", title:"At the Doctor / Pharmacy", note:"Kapag nagpapatingin o bumibili ng gamot.",
+    phrases:[
+      { q:"What brings you in today?", en:"I've had a headache and a sore throat since yesterday.", tl:"Direktang paraan ilarawan ang sintomas." },
+      { q:"On a scale of one to ten, how bad is the pain?", en:"I'd say around a six — it's manageable but noticeable.", tl:"<b>Manageable</b> = kaya pang pagtiisan." },
+      { q:"Are you taking any medication right now?", en:"Just some over-the-counter pain relievers, nothing prescribed.", tl:"<b>Over-the-counter</b> = walang reseta." },
+      { q:"Do you have any allergies?", en:"Not that I know of, but I haven't been tested.", tl:"Honest na sagot kahit hindi ka sigurado." },
+      { q:"How can I help you today? (sa parmasya)", en:"Do you have something for a dry cough that's safe to take with [other medicine]?", tl:"May safety consideration." },
+      { q:"What's the dosage for this?", en:"How many times a day should I take this, and should it be with food?", tl:"Karaniwang tanong para sigurado." },
+      { q:"Would you like the branded or generic version?", en:"Is this covered by my insurance, or would I need to pay out of pocket?", tl:"<b>Out of pocket</b> = babayaran mo mismo." },
+      { q:"You'll need to monitor your symptoms.", en:"Should I come back for a follow-up, or only if the symptoms don't go away?", tl:"Malinaw na tanong tungkol sa susunod na hakbang." }
+    ]
+  },
+  { id:"banking", mode:"life", title:"Banking &amp; Errands", note:"Sa bangko, palitan ng pera, o simpleng errands.",
+    phrases:[
+      { q:"How can I help you today?", en:"I'd like to open a new savings account, please.", tl:"Direktang sagot." },
+      { q:"Do you have an account with us?", en:"Yes, I do — here's my account number.", tl:"Simpleng sagot na may detalye." },
+      { q:"What would you like to do today?", en:"I need to send money to another account — could you walk me through the process?", tl:"Nag-aalok ka na tumulong sila." },
+      { q:"Cash or card?", en:"I'll pay in cash, please.", tl:"Maikli at direktang sagot." },
+      { q:"Do you have a valid ID?", en:"Yes, here's my ID and proof of address.", tl:"Karaniwang sagot sa verification." },
+      { q:"How would you like your change?", en:"Smaller bills would be great, if that's okay.", tl:"Simpleng request." },
+      { q:"Is there anything else I can help you with?", en:"That's all for now, thank you for your help.", tl:"Magandang paraan tapusin." },
+      { q:"Would you like a receipt?", en:"Yes, please — I'll need it for my records.", tl:"Karaniwang sagot sa business-related transaksyon." }
+    ]
+  },
+  { id:"friends", mode:"life", title:"Making Plans with Friends", note:"Pag-iimbita, pagsang-ayon, o pagtanggi nang magalang sa mga kaibigan.",
+    phrases:[
+      { q:"Want to grab dinner this weekend?", en:"I'd love to — what day works for you?", tl:"Positibong sagot na may follow-up." },
+      { q:"Are you free tonight?", en:"I'm actually a bit tied up tonight, but I'm free tomorrow if that works.", tl:"<b>Tied up</b> = busy." },
+      { q:"Should we invite the others too?", en:"Sure, the more the merrier.", tl:"Karaniwang expression." },
+      { q:"Where do you want to eat?", en:"I'm not picky, you can choose — I'm good with anything.", tl:"Flexible na sagot." },
+      { q:"Can we reschedule to another day?", en:"No problem, just let me know what day works better for you.", tl:"Simpleng pagsang-ayon." },
+      { q:"Do you want to split the bill?", en:"Sure, let's just split it evenly.", tl:"Karaniwang paraan mag-usap tungkol sa bayad." },
+      { q:"I might cancel last minute, is that okay?", en:"That's totally fine, just give me a heads up when you know.", tl:"<b>Heads up</b> = paunang babala." },
+      { q:"It's been a while, we should catch up soon.", en:"Definitely, let's find a day that works for both of us.", tl:"Positibong pagtanggap." }
+    ]
+  }
+];
+
+/* ============ MISTAKES / VOCAB / IDIOMS DATA ============ */
+const MISTAKES = [
+  { wrong:"I am going to eat already.", right:"I'm about to eat. / I'm going to eat now.", note:"Literal translation ng \"kakain na ako\" — sa English mas natural na \"about to\" o \"now\" imbes na \"already\" sa dulo." },
+  { wrong:"Open the light.", right:"Turn on the light.", note:"Direct translation ng \"buksan ang ilaw\" — sa English, \"turn on/off\" ang ginagamit para sa switches." },
+  { wrong:"I will go there now na.", right:"I'll head there now.", note:"Iwasan ang paghalo ng Tagalog particles sa English sentence." },
+  { wrong:"I have a problem in my stomach.", right:"I have a stomach ache. / My stomach hurts.", note:"Mas simple at natural ang direktang expression." },
+  { wrong:"Where are you going to?", right:"Where are you going?", note:"Hindi na kailangan ang \"to\" sa dulo ng tanong." },
+  { wrong:"For me, I think...", right:"I think... / Personally, I think...", note:"Redundant ang \"for me\" bago ang opinion, tanggalin na lang." },
+  { wrong:"I am the one who did it.", right:"I did it.", note:"Mas direkta at natural sa casual conversation, hindi kailangan ang paikot na sentence." },
+  { wrong:"What is your work?", right:"What do you do (for a living)?", note:"Standard na tanong sa English para sa trabaho ng isang tao." },
+  { wrong:"I'm going to the CR.", right:"I'm going to the restroom.", note:"\"CR\" ay Filipino English lang, hindi maiintindihan ng ibang nationalities." },
+  { wrong:"I don't have any idea about that.", right:"I have no idea. / I'm not sure about that.", note:"Mas natural at maikli ang short version." },
+  { wrong:"He is my officemate since 2020.", right:"He's been my officemate since 2020.", note:"Kailangan ng \"has/have been\" para sa continuing state mula noon hanggang ngayon." },
+  { wrong:"I will be the one to send it.", right:"I'll send it.", note:"Iwasan ang paikot-ikot na sentence structure kapag pwede namang diretso." },
+  { wrong:"Everytime I am busy, I forget to eat.", right:"Whenever I'm busy, I forget to eat.", note:"\"Every time\" ay dalawang salita, at \"whenever\" mas natural sa ganitong konteksto." },
+  { wrong:"I am jealous of your bag.", right:"I love your bag, I want one too!", note:"Sa English, \"jealous\" ay mas malakas at negative ang connotation kaysa sa casual na paggamit natin dito." },
+  { wrong:"Try to try lang.", right:"Just give it a shot. / Just try it out.", note:"Iwasan ang code-switch sa loob ng isang English sentence." },
+  { wrong:"I based it from the data.", right:"I based it on the data.", note:"\"Based on\" ang tamang preposition, hindi \"from.\"" },
+  { wrong:"Kindly send it to me po.", right:"Kindly send it to me. / Could you please send it to me?", note:"Iwasan ihalo ang \"po\" sa English sentence — gumamit na lang ng \"please\" o \"kindly.\"" },
+  { wrong:"I will contact you tomorrow, okay lang ba?", right:"I'll contact you tomorrow, is that okay?", note:"Panatilihing puro English ang sentence structure kahit informal ang tono." }
+];
+
+const VOCAB = [
+  { term:"Scope", meaning:"Ang saklaw ng trabaho na napagkasunduan.", example:"The scope of this project covers three automations." },
+  { term:"Deliverable", meaning:"Ang kongkretong output na ibibigay sa client.", example:"The final deliverable is a working CRM pipeline." },
+  { term:"Workflow", meaning:"Ang sunod-sunod na proseso o automation.", example:"I built a new workflow for lead follow-ups." },
+  { term:"Integration", meaning:"Ang pagkonekta ng dalawang systema.", example:"We need an integration between GHL and your calendar app." },
+  { term:"Dependency", meaning:"Isang bagay na kailangan bago matapos ang isa pa.", example:"This task has a dependency on the client's files." },
+  { term:"Bottleneck", meaning:"Ang bara o dahilan ng pagkaantala.", example:"The approval process is a bottleneck in our timeline." },
+  { term:"Stakeholder", meaning:"Sinumang may interes o apektado ng proyekto.", example:"Let's get all stakeholders on the same page." },
+  { term:"Onboarding", meaning:"Ang proseso ng pagsisimula sa bagong client o empleyado.", example:"Onboarding usually takes about a week." },
+  { term:"Turnaround time", meaning:"Ang oras bago matapos ang isang gawain.", example:"Our turnaround time for revisions is 48 hours." },
+  { term:"Scalable", meaning:"Kayang lumaki nang hindi masira.", example:"This automation is scalable as your leads grow." },
+  { term:"Bandwidth", meaning:"Ang available na oras o kapasidad para gumawa.", example:"I don't have the bandwidth to take on new clients this month." },
+  { term:"Iteration", meaning:"Bawat bersyon o pagsubok.", example:"Let's do one more iteration before we finalize." },
+  { term:"Deploy", meaning:"Ilabas o gawing live ang isang bagay.", example:"We'll deploy the changes tonight." },
+  { term:"Migrate", meaning:"Ilipat ang data mula sa isang system papunta sa iba.", example:"We need to migrate your contacts to the new CRM." },
+  { term:"Retainer", meaning:"Regular na bayad kada buwan para sa ongoing na serbisyo.", example:"He's on a monthly retainer for maintenance." },
+  { term:"Churn", meaning:"Pag-alis ng client o customer.", example:"We want to reduce client churn this year." },
+  { term:"KPI", meaning:"Key Performance Indicator — sukatan ng tagumpay.", example:"Our main KPI is lead conversion rate." },
+  { term:"Overhead", meaning:"Dagdag na gastos o oras na hindi direktang bahagi ng trabaho.", example:"Automations reduce the overhead of manual data entry." }
+];
+
+const IDIOMS = [
+  { phrase:"Let's circle back", meaning:"Babalikan natin mamaya ang topic na ito.", example:"Let's circle back to this after the call." },
+  { phrase:"Put a pin in that", meaning:"Ipagpaliban muna, huwag kalimutan.", example:"Good point, let's put a pin in that for now." },
+  { phrase:"Low-hanging fruit", meaning:"Madaling gawin, mabilis na resulta.", example:"Let's start with the low-hanging fruit before the big tasks." },
+  { phrase:"Move the needle", meaning:"Magdulot ng tunay na pagbabago o epekto.", example:"This feature won't really move the needle for your business." },
+  { phrase:"On the same page", meaning:"Magkaunawaan o magkasundo.", example:"Let's make sure we're on the same page before we start." },
+  { phrase:"Ballpark figure", meaning:"Tantiyang numero, hindi eksakto.", example:"Can you give me a ballpark figure for this project?" },
+  { phrase:"Touch base", meaning:"Mag-check in o mag-usap ulit.", example:"Let's touch base next week." },
+  { phrase:"Get the ball rolling", meaning:"Simulan na.", example:"Let's get the ball rolling on this project." },
+  { phrase:"Ahead of the curve", meaning:"Nauuna kumpara sa iba.", example:"This tool keeps you ahead of the curve." },
+  { phrase:"Back to the drawing board", meaning:"Magsimula ulit mula sa umpisa.", example:"That didn't work, back to the drawing board." },
+  { phrase:"Think outside the box", meaning:"Mag-isip ng creative o hindi karaniwang solusyon.", example:"We need to think outside the box for this campaign." },
+  { phrase:"Hit the ground running", meaning:"Magsimula agad nang mabilis at handa.", example:"The new hire hit the ground running on day one." },
+  { phrase:"In the loop", meaning:"Updated o alam ang nangyayari.", example:"Keep me in the loop on this." },
+  { phrase:"Game changer", meaning:"Isang bagay na malaking pagbabago ang dulot.", example:"This automation is a game changer for your business." },
+  { phrase:"Wear many hats", meaning:"Gumagawa ng maraming iba't ibang tungkulin.", example:"As a freelancer, you wear many hats." }
+];
+
+/* ============ STATE ============ */
+let libMode='work', quizMode='work', typeMode='work', voiceMode='work';
+let libQuery='';
+let libOpen=new Set();
+let quizCurrent=null, quizScore={correct:0,total:0};
+let typeCurrent=null;
+
+/* ============ TABS ============ */
+document.querySelectorAll('#tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='quiz' && !quizCurrent) newQuizQuestion();
+    if(btn.dataset.tab==='typing' && !typeCurrent) newTypeQuestion();
+    if(btn.dataset.tab==='voice') renderVoice();
+  });
+});
+
+/* ============ LIBRARY ============ */
+function renderLibrary(){
+  const root = document.getElementById('categories');
+  root.innerHTML = '';
+  let shown = 0;
+  const cats = DATA.filter(c => c.mode === libMode);
+  cats.forEach((cat, ci) => {
+    const matched = cat.phrases.filter(p=>{
+      if(!libQuery) return true;
+      const q = libQuery.toLowerCase();
+      return p.en.toLowerCase().includes(q) || p.tl.toLowerCase().includes(q) || p.q.toLowerCase().includes(q) || cat.title.toLowerCase().includes(q);
+    });
+    if(matched.length === 0) return;
+    shown += matched.length;
+    const isOpen = libOpen.has(cat.id) || (libQuery.length > 0);
+    const section = document.createElement('section');
+    section.className = 'category' + (isOpen ? ' open' : '');
+    section.innerHTML = `
+      <div class="cat-head">
+        <span class="cat-index">${String(ci+1).padStart(2,'0')}</span>
+        <div class="cat-title-wrap">
+          <div class="cat-title">${cat.title}</div>
+          <div class="cat-note">${cat.note}</div>
+        </div>
+        <span class="cat-arrow">&#9656;</span>
+      </div>
+      <div class="cards"></div>
+    `;
+    section.querySelector('.cat-head').addEventListener('click', ()=>{
+      if(libOpen.has(cat.id)) libOpen.delete(cat.id); else libOpen.add(cat.id);
+      renderLibrary();
+    });
+    const cardsWrap = section.querySelector('.cards');
+    matched.forEach((p, pi)=>{
+      const tag = cat.id.slice(0,3).toUpperCase() + '-' + String(pi+1).padStart(2,'0');
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <span class="tag">${tag}</span>
+        <div class="content">
+          <p class="q"><span class="qlabel">Q</span>${p.q}</p>
+          <p class="en">${p.en}</p>
+          <p class="tl">${p.tl}</p>
+        </div>
+      `;
+      cardsWrap.appendChild(card);
+    });
+    root.appendChild(section);
+  });
+  document.getElementById('emptyState').style.display = shown === 0 ? 'block' : 'none';
+  document.getElementById('resultCount').textContent = libQuery ? `${shown} match${shown===1?'':'es'}` : '';
+}
+document.getElementById('search').addEventListener('input', e=>{ libQuery = e.target.value.trim(); renderLibrary(); });
+document.querySelectorAll('#libSwitcher button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#libSwitcher button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); libMode=b.dataset.mode; libOpen=new Set(); renderLibrary();
+}));
+
+/* ============ QUIZ ============ */
+function flatPhrases(mode){
+  const out=[];
+  DATA.filter(c=>c.mode===mode).forEach(c=>c.phrases.forEach(p=>out.push(p)));
+  return out;
+}
+function newQuizQuestion(){
+  const pool = flatPhrases(quizMode);
+  const correct = pool[Math.floor(Math.random()*pool.length)];
+  let distractors = pool.filter(p=>p.en!==correct.en).sort(()=>0.5-Math.random()).slice(0,3);
+  const options = [correct, ...distractors].sort(()=>0.5-Math.random());
+  quizCurrent = { correct, options };
+  document.getElementById('quizQ').textContent = correct.q;
+  const optWrap = document.getElementById('quizOptions');
+  optWrap.innerHTML = '';
+  options.forEach(opt=>{
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.textContent = opt.en;
+    div.addEventListener('click', ()=>answerQuiz(opt, div));
+    optWrap.appendChild(div);
+  });
+  updateQuizScore();
+}
+function answerQuiz(opt, el){
+  if(el.classList.contains('disabled')) return;
+  document.querySelectorAll('#quizOptions .option').forEach(o=>o.classList.add('disabled'));
+  const isCorrect = opt.en === quizCurrent.correct.en;
+  quizScore.total++;
+  if(isCorrect) quizScore.correct++;
+  document.querySelectorAll('#quizOptions .option').forEach(o=>{
+    if(o.textContent === quizCurrent.correct.en) o.classList.add('correct');
+    else o.classList.add('wrong');
+  });
+  updateQuizScore();
+}
+function updateQuizScore(){
+  document.getElementById('quizScore').textContent = `Score: ${quizScore.correct} / ${quizScore.total}`;
+}
+document.getElementById('quizNext').addEventListener('click', newQuizQuestion);
+document.querySelectorAll('#quizSwitcher button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#quizSwitcher button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); quizMode=b.dataset.mode; newQuizQuestion();
+}));
+
+/* ============ TYPING ============ */
+function newTypeQuestion(){
+  const pool = flatPhrases(typeMode);
+  typeCurrent = pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('typeQ').textContent = typeCurrent.q;
+  document.getElementById('typeInput').value = '';
+  document.getElementById('typeRevealBox').style.display = 'none';
+}
+document.getElementById('typeReveal').addEventListener('click', ()=>{
+  const yourAnswer = document.getElementById('typeInput').value.trim();
+  const box = document.getElementById('typeRevealBox');
+  box.innerHTML = `
+    <div class="lbl">Best Answer</div>
+    <p class="best">${typeCurrent.en}</p>
+    ${yourAnswer ? `<div class="lbl">Your Answer</div><p class="yours">${yourAnswer}</p>` : ''}
+    <p class="tl">${typeCurrent.tl}</p>
+  `;
+  box.style.display = 'block';
+});
+document.getElementById('typeNext').addEventListener('click', newTypeQuestion);
+document.querySelectorAll('#typeSwitcher button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#typeSwitcher button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); typeMode=b.dataset.mode; newTypeQuestion();
+}));
+
+/* ============ VOICE ============ */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+function speak(text){
+  try{
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.92;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  }catch(e){ console.error(e); }
+}
+function similarity(a,b){
+  const wa = a.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(Boolean);
+  const wb = b.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(Boolean);
+  if(wa.length===0) return 0;
+  let matches=0;
+  wb.forEach(w=>{ if(wa.includes(w)) matches++; });
+  return Math.round((matches/wa.length)*100);
+}
+function renderVoice(){
+  const listEl = document.getElementById('voiceList');
+  const unsupportedEl = document.getElementById('voiceUnsupported');
+  if(!SpeechRecognition) unsupportedEl.style.display = 'block';
+  listEl.innerHTML = '';
+  const pool = flatPhrases(voiceMode);
+  pool.forEach((p, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'voice-row';
+    row.innerHTML = `
+      <p class="voice-target">${p.en}</p>
+      <div class="voice-controls">
+        <button class="btn" data-listen="${idx}">🔊 Listen</button>
+        ${SpeechRecognition ? `<button class="btn" data-record="${idx}">🎤 Practice</button>` : ''}
+      </div>
+      <div class="voice-result" id="voiceResult-${idx}" style="display:none;"></div>
+    `;
+    listEl.appendChild(row);
+  });
+  listEl.querySelectorAll('[data-listen]').forEach(btn=>{
+    btn.addEventListener('click', ()=> speak(pool[btn.dataset.listen].en));
+  });
+  if(SpeechRecognition){
+    listEl.querySelectorAll('[data-record]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = btn.dataset.record;
+        const target = pool[idx].en;
+        const resultEl = document.getElementById('voiceResult-'+idx);
+        btn.textContent = '🎙️ Listening…';
+        btn.disabled = true;
+        const rec = new SpeechRecognition();
+        rec.lang = 'en-US';
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        rec.onresult = (e)=>{
+          const said = e.results[0][0].transcript;
+          const score = similarity(target, said);
+          resultEl.style.display = 'block';
+          resultEl.innerHTML = `<b>You said:</b> "${said}"<br><b>Match:</b> ${score}%`;
+          btn.textContent = '🎤 Practice';
+          btn.disabled = false;
+        };
+        rec.onerror = ()=>{
+          resultEl.style.display = 'block';
+          resultEl.innerHTML = `Couldn't catch that — try again.`;
+          btn.textContent = '🎤 Practice';
+          btn.disabled = false;
+        };
+        rec.onend = ()=>{
+          btn.textContent = '🎤 Practice';
+          btn.disabled = false;
+        };
+        rec.start();
+      });
+    });
+  }
+}
+document.querySelectorAll('#voiceSwitcher button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#voiceSwitcher button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); voiceMode=b.dataset.mode; renderVoice();
+}));
+
+/* ============ MISTAKES / VOCAB / IDIOMS ============ */
+function renderMistakes(){
+  const el = document.getElementById('mistakesList');
+  el.innerHTML = MISTAKES.map(m=>`
+    <div class="flat-card">
+      <p class="wrong-line"><span class="x">✗</span>${m.wrong}</p>
+      <p class="right-line"><span class="ck">✓</span>${m.right}</p>
+      <p class="note">${m.note}</p>
+    </div>
+  `).join('');
+}
+function renderVocab(){
+  const el = document.getElementById('vocabList');
+  el.innerHTML = VOCAB.map(v=>`
+    <div class="flat-card">
+      <p class="vocab-term">${v.term}</p>
+      <p class="vocab-meaning">${v.meaning}</p>
+      <p class="vocab-example">"${v.example}"</p>
+    </div>
+  `).join('');
+}
+function renderIdioms(){
+  const el = document.getElementById('idiomsList');
+  el.innerHTML = IDIOMS.map(i=>`
+    <div class="flat-card">
+      <p class="vocab-term">${i.phrase}</p>
+      <p class="vocab-meaning">${i.meaning}</p>
+      <p class="vocab-example">"${i.example}"</p>
+    </div>
+  `).join('');
+}
+
+/* ============ STREAK ============ */
+function loadStreak(){
+  let data = { lastDate:null, streak:0 };
+  const raw = localStorage.getItem('streak-data');
+  if(raw) data = JSON.parse(raw);
+  const today = new Date().toISOString().slice(0,10);
+  if(data.lastDate === today){
+    // already counted today
+  }else{
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    if(data.lastDate === yesterday){ data.streak = (data.streak||0)+1; }
+    else { data.streak = 1; }
+    data.lastDate = today;
+    localStorage.setItem('streak-data', JSON.stringify(data));
+  }
+  document.getElementById('streakBadge').innerHTML = `🔥 <b>${data.streak||1}</b>-day streak`;
+}
+
+/* ============ INIT ============ */
+renderLibrary();
+renderMistakes();
+renderVocab();
+renderIdioms();
+loadStreak();
+</script>
+</body>
+</html>
