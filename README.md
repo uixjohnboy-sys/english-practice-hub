@@ -12,21 +12,20 @@ npx serve .
 
 ## Deploy to Vercel
 
-First-time deploy:
+This repo is connected to Vercel via GitHub (https://github.com/uixjohnboy-sys/english-practice-hub) — every push to `master` auto-deploys.
 
-```
-cd english-practice-hub
-vercel
-```
-
-Follow the prompts (link/create a project, accept the defaults — it's a static site, no build command needed).
-
-Future updates:
+To update the live site:
 
 ```
 git add .
 git commit -m "your change"
-vercel --prod
+git push
 ```
 
-(Or push to your connected Git remote if you set one up in the Vercel dashboard — it will auto-deploy on push.)
+Vercel picks up the push automatically and deploys within a minute or two. Live at: https://english-practice-hub-ashy.vercel.app
+
+You can still deploy manually with the CLI if needed:
+
+```
+vercel --prod
+```
