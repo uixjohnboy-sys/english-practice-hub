@@ -194,7 +194,14 @@
 
   .vocab-term{font-family:'Fraunces',serif;font-size:16.5px;font-weight:600;color:var(--pearl);margin:0 0 5px;}
   .vocab-meaning{font-size:13.5px;color:var(--pearl-dim);margin:0 0 8px;line-height:1.5;}
-  .vocab-example{font-size:13px;color:var(--pearl-faint);font-style:italic;margin:0;}
+  .vocab-example{font-size:13px;color:var(--pearl-faint);font-style:italic;margin:0 0 4px;}
+  .vocab-example:last-child{margin-bottom:0;}
+
+  .vocab-week-note{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--pearl-faint);
+    margin-bottom:14px;
+  }
+  .vocab-reset-wrap{display:flex;justify-content:center;margin-top:22px;}
 
   footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--border-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--pearl-faint);text-align:center;}
 
@@ -302,7 +309,11 @@
 
   <!-- VOCAB -->
   <div class="panel" id="panel-vocab">
+    <div class="vocab-week-note" id="vocabWeekNote"></div>
     <div id="vocabList"></div>
+    <div class="vocab-reset-wrap">
+      <button class="btn" id="vocabReset">🔄 Reset This Week's 25 Words</button>
+    </div>
   </div>
 
   <!-- IDIOMS -->
@@ -581,24 +592,56 @@ const MISTAKES = [
 ];
 
 const VOCAB = [
-  { term:"Scope", meaning:"Ang saklaw ng trabaho na napagkasunduan.", example:"The scope of this project covers three automations." },
-  { term:"Deliverable", meaning:"Ang kongkretong output na ibibigay sa client.", example:"The final deliverable is a working CRM pipeline." },
-  { term:"Workflow", meaning:"Ang sunod-sunod na proseso o automation.", example:"I built a new workflow for lead follow-ups." },
-  { term:"Integration", meaning:"Ang pagkonekta ng dalawang systema.", example:"We need an integration between GHL and your calendar app." },
-  { term:"Dependency", meaning:"Isang bagay na kailangan bago matapos ang isa pa.", example:"This task has a dependency on the client's files." },
-  { term:"Bottleneck", meaning:"Ang bara o dahilan ng pagkaantala.", example:"The approval process is a bottleneck in our timeline." },
-  { term:"Stakeholder", meaning:"Sinumang may interes o apektado ng proyekto.", example:"Let's get all stakeholders on the same page." },
-  { term:"Onboarding", meaning:"Ang proseso ng pagsisimula sa bagong client o empleyado.", example:"Onboarding usually takes about a week." },
-  { term:"Turnaround time", meaning:"Ang oras bago matapos ang isang gawain.", example:"Our turnaround time for revisions is 48 hours." },
-  { term:"Scalable", meaning:"Kayang lumaki nang hindi masira.", example:"This automation is scalable as your leads grow." },
-  { term:"Bandwidth", meaning:"Ang available na oras o kapasidad para gumawa.", example:"I don't have the bandwidth to take on new clients this month." },
-  { term:"Iteration", meaning:"Bawat bersyon o pagsubok.", example:"Let's do one more iteration before we finalize." },
-  { term:"Deploy", meaning:"Ilabas o gawing live ang isang bagay.", example:"We'll deploy the changes tonight." },
-  { term:"Migrate", meaning:"Ilipat ang data mula sa isang system papunta sa iba.", example:"We need to migrate your contacts to the new CRM." },
-  { term:"Retainer", meaning:"Regular na bayad kada buwan para sa ongoing na serbisyo.", example:"He's on a monthly retainer for maintenance." },
-  { term:"Churn", meaning:"Pag-alis ng client o customer.", example:"We want to reduce client churn this year." },
-  { term:"KPI", meaning:"Key Performance Indicator — sukatan ng tagumpay.", example:"Our main KPI is lead conversion rate." },
-  { term:"Overhead", meaning:"Dagdag na gastos o oras na hindi direktang bahagi ng trabaho.", example:"Automations reduce the overhead of manual data entry." }
+  { term:"Scope", meaning:"Ang saklaw ng trabaho na napagkasunduan.", examples:["The scope of this project covers three automations.","We need to narrow the scope before the deadline.","Anything outside the scope will be billed separately."] },
+  { term:"Deliverable", meaning:"Ang kongkretong output na ibibigay sa client.", examples:["The final deliverable is a working CRM pipeline.","Each deliverable has its own due date.","Please review the deliverable before we submit it."] },
+  { term:"Workflow", meaning:"Ang sunod-sunod na proseso o automation.", examples:["I built a new workflow for lead follow-ups.","This workflow saves us hours every week.","Let's simplify the approval workflow."] },
+  { term:"Integration", meaning:"Ang pagkonekta ng dalawang systema.", examples:["We need an integration between GHL and your calendar app.","The integration failed because of an expired API key.","This tool has a built-in integration with Slack."] },
+  { term:"Dependency", meaning:"Isang bagay na kailangan bago matapos ang isa pa.", examples:["This task has a dependency on the client's files.","We removed the dependency to speed up the build.","List all dependencies before starting the sprint."] },
+  { term:"Bottleneck", meaning:"Ang bara o dahilan ng pagkaantala.", examples:["The approval process is a bottleneck in our timeline.","We identified the bottleneck and fixed it.","Manual data entry is often a bottleneck."] },
+  { term:"Stakeholder", meaning:"Sinumang may interes o apektado ng proyekto.", examples:["Let's get all stakeholders on the same page.","Every stakeholder signed off on the plan.","We invited key stakeholders to the kickoff call."] },
+  { term:"Onboarding", meaning:"Ang proseso ng pagsisimula sa bagong client o empleyado.", examples:["Onboarding usually takes about a week.","We improved our client onboarding process.","New hires go through a two-day onboarding."] },
+  { term:"Turnaround time", meaning:"Ang oras bago matapos ang isang gawain.", examples:["Our turnaround time for revisions is 48 hours.","The turnaround time improved after we hired help.","Ask about their turnaround time before hiring them."] },
+  { term:"Scalable", meaning:"Kayang lumaki nang hindi masira.", examples:["This automation is scalable as your leads grow.","We built a scalable solution from day one.","Is this pricing model scalable for enterprise clients?"] },
+  { term:"Bandwidth", meaning:"Ang available na oras o kapasidad para gumawa.", examples:["I don't have the bandwidth to take on new clients this month.","Do you have the bandwidth to review this today?","Our team's bandwidth is limited this quarter."] },
+  { term:"Iteration", meaning:"Bawat bersyon o pagsubok.", examples:["Let's do one more iteration before we finalize.","Each iteration got closer to what the client wanted.","This is the third iteration of the design."] },
+  { term:"Deploy", meaning:"Ilabas o gawing live ang isang bagay.", examples:["We'll deploy the changes tonight.","The new feature was deployed without issues.","Don't deploy on a Friday afternoon."] },
+  { term:"Migrate", meaning:"Ilipat ang data mula sa isang system papunta sa iba.", examples:["We need to migrate your contacts to the new CRM.","The migration took longer than expected.","We migrated the whole database over the weekend."] },
+  { term:"Retainer", meaning:"Regular na bayad kada buwan para sa ongoing na serbisyo.", examples:["He's on a monthly retainer for maintenance.","Our retainer covers up to ten hours a month.","She switched from hourly billing to a retainer."] },
+  { term:"Churn", meaning:"Pag-alis ng client o customer.", examples:["We want to reduce client churn this year.","Churn went up after the price increase.","High churn usually means a support problem."] },
+  { term:"KPI", meaning:"Key Performance Indicator — sukatan ng tagumpay.", examples:["Our main KPI is lead conversion rate.","We track five KPIs every month.","This dashboard shows all our KPIs in one view."] },
+  { term:"Overhead", meaning:"Dagdag na gastos o oras na hindi direktang bahagi ng trabaho.", examples:["Automations reduce the overhead of manual data entry.","Running two offices adds a lot of overhead.","We cut overhead by switching to remote work."] },
+  { term:"Leverage", meaning:"Gamitin nang husto ang isang bagay para makinabang.", examples:["We can leverage your existing audience to launch this faster.","Leverage the data you already have before collecting more.","They leveraged their network to close the deal."] },
+  { term:"Streamline", meaning:"Gawing mas simple at mabilis ang isang proseso.", examples:["This tool helps streamline your invoicing process.","We streamlined the workflow to cut steps in half.","Streamlining onboarding saved us a week per client."] },
+  { term:"Prioritize", meaning:"Piliin kung ano ang unahin gawin.", examples:["Let's prioritize the bug fixes before new features.","I had to prioritize which tasks matter most today.","We prioritize client requests based on urgency."] },
+  { term:"Feasible", meaning:"Kayang gawin o posibleng mangyari.", examples:["Is it feasible to launch by next Friday?","That timeline isn't feasible with our current team.","We ran a quick test to see if it's feasible."] },
+  { term:"Robust", meaning:"Matibay, maaasahan, hindi madaling masira.", examples:["We need a more robust system to handle this load.","Their security setup is very robust.","This is a robust solution that can scale with you."] },
+  { term:"Redundant", meaning:"Hindi na kailangan dahil paulit-ulit o sobra.", examples:["This step is redundant now that the form is automated.","We removed redundant fields from the intake form.","Having two people do the same check is redundant."] },
+  { term:"Mitigate", meaning:"Bawasan ang panganib o negatibong epekto.", examples:["We added a backup server to mitigate downtime risk.","This plan mitigates most of the delivery delays.","Let's mitigate the risk before we launch."] },
+  { term:"Facilitate", meaning:"Tumulong para mapadali ang isang proseso.", examples:["This tool facilitates faster communication with clients.","She facilitated the meeting between both teams.","Good documentation facilitates onboarding new hires."] },
+  { term:"Synergy", meaning:"Mas malaking resulta kapag nagtutulungan.", examples:["There's real synergy between the design and dev teams.","We're looking for synergy between these two products.","The merger created synergy across both companies."] },
+  { term:"Optimize", meaning:"Gawing mas maayos o episyente.", examples:["We optimized the page to load twice as fast.","Let's optimize this workflow before scaling it.","The ad campaign was optimized for conversions."] },
+  { term:"Consensus", meaning:"Pinagkasunduang desisyon ng grupo.", examples:["We reached a consensus after the second call.","There's no consensus yet on the new pricing.","Let's build consensus before we announce this."] },
+  { term:"Proactive", meaning:"Kumikilos bago pa man maging problema.", examples:["She's proactive about flagging issues early.","Being proactive here saved us a lot of rework.","We take a proactive approach to client support."] },
+  { term:"Versatile", meaning:"Kayang gumawa ng iba't ibang bagay.", examples:["This tool is versatile enough for multiple industries.","He's a versatile designer who also codes.","We need a versatile plan that fits any client."] },
+  { term:"Comprehensive", meaning:"Kumpleto at masusi.", examples:["Here's a comprehensive breakdown of the costs.","We did a comprehensive review of the system.","This guide is comprehensive enough for beginners."] },
+  { term:"Ambiguous", meaning:"Hindi malinaw, maaaring maipakahulugan sa iba't ibang paraan.", examples:["That instruction was a bit ambiguous, can you clarify?","The contract had an ambiguous clause about deadlines.","Let's avoid ambiguous language in the proposal."] },
+  { term:"Concise", meaning:"Maikli pero malinaw ang pagkakasabi.", examples:["Keep the email concise, they're busy.","That was a concise summary of the meeting.","Try to be more concise in your report."] },
+  { term:"Discrepancy", meaning:"Hindi pagtutugma ng dalawang bagay.", examples:["There's a discrepancy between the invoice and the quote.","We found a discrepancy in the numbers.","Please explain this discrepancy before we proceed."] },
+  { term:"Contingency", meaning:"Alternatibong plano kung sakaling magkaproblema.", examples:["We always have a contingency plan for launches.","What's our contingency if the server goes down?","Build in a contingency for unexpected delays."] },
+  { term:"Viable", meaning:"Posible o kayang gawin nang matagumpay.", examples:["Is this business model still viable long-term?","We tested two viable options before deciding.","That's not a viable solution for our budget."] },
+  { term:"Rationale", meaning:"Ang dahilan sa likod ng isang desisyon.", examples:["What's the rationale behind this pricing change?","She explained her rationale clearly in the email.","Our rationale is based on last quarter's data."] },
+  { term:"Precedent", meaning:"Naunang kaso na ginagamit bilang batayan.", examples:["This sets a precedent for future projects.","There's no precedent for this kind of request.","We followed the precedent from last year's launch."] },
+  { term:"Inherent", meaning:"Likas na bahagi ng isang bagay.", examples:["There's inherent risk in launching something new.","This role has inherent flexibility in scheduling.","That's an inherent limitation of the platform."] },
+  { term:"Explicit", meaning:"Malinaw at diretso, walang paligoy-ligoy.", examples:["Please give explicit instructions so there's no confusion.","We need explicit approval before we start.","The contract is explicit about payment terms."] },
+  { term:"Implicit", meaning:"Ipinapahiwatig lang, hindi tuwirang sinabi.", examples:["There was an implicit agreement that we'd split the cost.","His silence felt like implicit approval.","That clause is implicit in most standard contracts."] },
+  { term:"Cohesive", meaning:"Magkakaugnay at maayos na magkasama.", examples:["We want the branding to feel cohesive across platforms.","The team worked as a cohesive unit.","This plan needs to be more cohesive."] },
+  { term:"Nuance", meaning:"Maliit pero mahalagang pagkakaiba.", examples:["There's a subtle nuance between these two words.","Pay attention to the nuance in her feedback.","Cultural nuance matters a lot in marketing copy."] },
+  { term:"Pragmatic", meaning:"Praktikal, nakatuon sa magagawa.", examples:["Let's take a pragmatic approach to this problem.","He gave a pragmatic solution instead of an ideal one.","Being pragmatic here will save us time."] },
+  { term:"Meticulous", meaning:"Maingat na maingat sa detalye.", examples:["She's meticulous about checking every line of the contract.","This report needed a meticulous review.","He's known for his meticulous attention to detail."] },
+  { term:"Resilient", meaning:"Matatag at kayang bumangon sa hamon.", examples:["Our systems are resilient even during high traffic.","She stayed resilient through a tough project.","We built a resilient process that survives changes."] },
+  { term:"Holistic", meaning:"Tinitingnan ang buong larawan, hindi bahagi lang.", examples:["We take a holistic approach to client strategy.","This plan looks at the holistic customer journey.","A holistic review means checking every touchpoint."] },
+  { term:"Empower", meaning:"Bigyan ng kakayahan o kapangyarihang kumilos.", examples:["This dashboard empowers clients to track progress themselves.","We want to empower the team to make decisions.","Good training empowers new hires to work independently."] },
+  { term:"Align", meaning:"Pagkakatugma ng direksyon o layunin.", examples:["Let's align on the goals before we start.","Our timeline needs to align with the client's launch date.","The team is finally aligned on the strategy."] }
 ];
 
 const IDIOMS = [
@@ -859,16 +902,44 @@ function renderMistakes(){
     </div>
   `).join('');
 }
+const VOCAB_WEEK_SIZE = 25;
+function pickRandomVocabSet(){
+  const shuffled = [...VOCAB].sort(()=>0.5-Math.random());
+  return shuffled.slice(0, VOCAB_WEEK_SIZE).map(v=>v.term);
+}
+function getVocabWeekSet(){
+  let terms = [];
+  const raw = localStorage.getItem('vocab-week-set');
+  if(raw){
+    try{ terms = JSON.parse(raw); }catch(e){ terms = []; }
+  }
+  const valid = terms.filter(t=>VOCAB.some(v=>v.term===t));
+  if(valid.length !== VOCAB_WEEK_SIZE){
+    terms = pickRandomVocabSet();
+    localStorage.setItem('vocab-week-set', JSON.stringify(terms));
+  }else{
+    terms = valid;
+  }
+  return terms.map(t=>VOCAB.find(v=>v.term===t)).filter(Boolean);
+}
+function resetVocabWeekSet(){
+  const terms = pickRandomVocabSet();
+  localStorage.setItem('vocab-week-set', JSON.stringify(terms));
+  renderVocab();
+}
 function renderVocab(){
   const el = document.getElementById('vocabList');
-  el.innerHTML = VOCAB.map(v=>`
+  const weekSet = getVocabWeekSet();
+  document.getElementById('vocabWeekNote').textContent = `This week's ${weekSet.length} words — stays the same until you hit reset.`;
+  el.innerHTML = weekSet.map(v=>`
     <div class="flat-card">
       <p class="vocab-term">${v.term}</p>
       <p class="vocab-meaning">${v.meaning}</p>
-      <p class="vocab-example">"${v.example}"</p>
+      ${v.examples.map(ex=>`<p class="vocab-example">"${ex}"</p>`).join('')}
     </div>
   `).join('');
 }
+document.getElementById('vocabReset').addEventListener('click', resetVocabWeekSet);
 function renderIdioms(){
   const el = document.getElementById('idiomsList');
   el.innerHTML = IDIOMS.map(i=>`
@@ -904,7 +975,7 @@ function loadWordOfDay(){
   const word = VOCAB[daysSinceEpoch % VOCAB.length];
   document.getElementById('wotdTerm').textContent = word.term;
   document.getElementById('wotdMeaning').textContent = word.meaning;
-  document.getElementById('wotdExample').textContent = `"${word.example}"`;
+  document.getElementById('wotdExample').textContent = `"${word.examples[0]}"`;
 }
 
 /* ============ INIT ============ */
